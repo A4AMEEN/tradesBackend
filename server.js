@@ -11,14 +11,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // CORS Configuration
-const corsOptions = {
-  origin: ['https://mallutrades.vercel.app', 'http://localhost:4200'],
+// Simplified CORS configuration
+app.use(cors({
+  origin: '*',  // Allow all origins
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
   preflightContinue: false,
-  optionsSuccessStatus: 204,
-};
+  optionsSuccessStatus: 204
+}));
 
 app.use(cors(corsOptions));
 
