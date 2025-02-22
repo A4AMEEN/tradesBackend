@@ -12,6 +12,7 @@ router.post('/resend-otp', authController.resendOtp);
 router.post('/verify-otp', authController.verifyOtp);
 
 router.get('/linked-users', async (req, res) => {
+  console.log("came heree")
     try {
       const response = await axios.get('http://api.mallulifesteal.fun/api/linked', {
         headers: {

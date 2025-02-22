@@ -26,6 +26,9 @@ exports.login = async (req, res) => {
         if (!existingUser) {
             return res.status(400).json({ error: "Invalid email or password." });
         }
+        if (existingUser.isBlocked) {
+            return res.status(400).json({ error: "You Account is Blocked,Connect with Shakthi_PC" });
+        }
 
         // Validate password (Plain text comparison)
         if (existingUser.password !== password) {
@@ -41,7 +44,7 @@ exports.login = async (req, res) => {
 
         res.status(200).json({
             message: "Login successful!",
-            user: { name: existingUser.name, email: existingUser.email,_id:existingUser._id },
+            user: { name: existingUser.name, email: existingUser.email,_id:existingUser._id,totalTrades:existingUser.totalTrades },
             token,
         });
     } catch (error) {

@@ -2,55 +2,41 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const multer = require('multer');
 const path = require('path');
-
 const authRoutes = require('./Routers/authRoutes');
 const tradeRoutes = require('./Routers/tradeRoutes');
 
 dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Multer Configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
+// CORS Configuration
+const corsOptions = {
+  origin: ['https://mallutrades.vercel.app', 'http://localhost:4200'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
 
-const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, 
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type'), false);
-    }
-  }
-});
+app.use(cors(corsOptions));
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
-// Add upload to global for routes to use
-global.upload = upload;
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/trades', tradeRoutes);
 
+app.get('/test', (req, res) => {
+  console.log("backend Pinginnnngggg...")
+  res.json({ message: "Hello from backend" });
+});
+
 // MongoDB Connection
-mongoose.connect("mongodb://localhost:27017/trades", {
+mongoose.connect(process.env.MONGODB_URI || "mongodb+srv://alameenmail07:45ZzYzLognmUo34k@cluster0.u1jnq.mongodb.net/Cluster0?retryWrites=true&w=majority", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

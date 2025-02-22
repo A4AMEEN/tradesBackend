@@ -6,39 +6,40 @@ const nodemailer = require('nodemailer');
 
 exports.createTrade = async (req, res) => {
     try {
-        // Check if item already exists
-        const existingTrade = await Trade.findOne({ itemName: req.body.item });
-        if (existingTrade) {
-            return res.status(400).json({
-                message: "An item with this name already exists",
-                error: "Duplicate item name"
-            });
-        }
-
-        const tradeData = {
-            itemName: req.body.item,
-            quantity: req.body.quantity,
-            price: {
-                ingot: req.body.priceIngots,
-                rs: req.body.priceIRL
-            },
-            offer: req.body.offer || '',
-            stockOut: false,
-            img: req.file ? `/uploads/${req.file.filename}` : null
-        };
-
-        const trade = new Trade(tradeData);
-        await trade.save();
-
-        res.status(201).json({
-            message: "Trade created successfully!",
-            trade,
+      // Check if item already exists
+      const existingTrade = await Trade.findOne({ itemName: req.body.item });
+      if (existingTrade) {
+        return res.status(400).json({
+          message: "An item with this name already exists",
+          error: "Duplicate item name"
         });
+      }
+  
+      const tradeData = {
+        itemName: req.body.item,
+        quantity: req.body.quantity,
+        price: {
+          ingot: req.body.priceIngots,
+          rs: req.body.priceIRL
+        },
+        offer: req.body.offer || '',
+        stockOut: false,
+        // Use Cloudinary URL instead of local path
+        img: req.file ? req.file.path : null
+      };
+  
+      const trade = new Trade(tradeData);
+      await trade.save();
+  
+      res.status(201).json({
+        message: "Trade created successfully!",
+        trade,
+      });
     } catch (error) {
-        console.error("Trade Save Error:", error);
-        res.status(400).json({ error: error.message });
+      console.error("Trade Save Error:", error);
+      res.status(400).json({ error: error.message });
     }
-};
+  };
 
 exports.getAllTrades = async (req, res) => {
     console.log("trades");
@@ -65,39 +66,43 @@ exports.getTradeById = async (req, res) => {
 
 exports.updateTrade = async (req, res) => {
     try {
-        const updateData = {
-            itemName: req.body.item,
-            quantity: req.body.quantity,
-            price: {
-                ingot: req.body.priceIngots,
-                rs: req.body.priceIRL
-            },
-            offer: req.body.offer || '',
-            stockOut: req.body.stockStatus === 'Out of Stock',
-            img: req.file ? `/uploads/${req.file.filename}` : undefined
-        };
-        console.log(updateData);
-
-
-        const trade = await Trade.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true, runValidators: true }
-        );
-
-        if (!trade) {
-            return res.status(404).json({ message: "Trade not found" });
-        }
-
-        res.status(200).json({
-            message: "Trade updated successfully",
-            trade
-        });
+      const updateData = {
+        itemName: req.body.item,
+        quantity: req.body.quantity,
+        price: {
+          ingot: req.body.priceIngots,
+          rs: req.body.priceIRL
+        },
+        offer: req.body.offer || '',
+        stockOut: req.body.stockStatus === 'Out of Stock'
+      };
+  
+      // Only update the image if a new file is uploaded
+      if (req.file) {
+        updateData.img = req.file.path; // Cloudinary URL is stored in req.file.path
+      }
+  
+      console.log(updateData);
+  
+      const trade = await Trade.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        { new: true, runValidators: true }
+      );
+  
+      if (!trade) {
+        return res.status(404).json({ message: "Trade not found" });
+      }
+  
+      res.status(200).json({
+        message: "Trade updated successfully",
+        trade
+      });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+      console.error("Update Trade Error:", error);
+      res.status(400).json({ error: error.message });
     }
-};
-
+  };
 exports.toggleTradeStock = async (req, res) => {
     try {
         const trade = await Trade.findById(req.params.id);

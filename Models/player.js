@@ -6,6 +6,7 @@ const PlayerSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     totalTrades: { type: Number, default: 0 },
+    isBlocked: { type: Boolean, default: false },
     trades: [
       {
         tradeId: { type: String, required: true },
